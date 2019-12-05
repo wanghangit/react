@@ -133,6 +133,11 @@ export function createBlockingRoot(
   return new ReactDOMBlockingRoot(container, BlockingRoot, options);
 }
 
+/**
+ * 创建并返回root对象
+ * @param {*} container 
+ * @param {*} options 
+ */
 export function createLegacyRoot(
   container: DOMContainer,
   options?: RootOptions,

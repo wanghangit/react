@@ -111,6 +111,12 @@ function shouldHydrateDueToLegacyHeuristic(container) {
   );
 }
 
+/**
+ * 创建fiberRoot
+ * 整个渲染树的根对象指向rootFiber
+ * @param {*} container 
+ * @param {*} forceHydrate 
+ */
 function legacyCreateRootFromDOMContainer(
   container: DOMContainer,
   forceHydrate: boolean,
@@ -118,6 +124,7 @@ function legacyCreateRootFromDOMContainer(
   const shouldHydrate =
     forceHydrate || shouldHydrateDueToLegacyHeuristic(container);
   // First clear any existing content.
+  // 如果不需要调节旧的元素直接移除
   if (!shouldHydrate) {
     let warned = false;
     let rootSibling;
