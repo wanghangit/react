@@ -114,6 +114,7 @@ function shouldHydrateDueToLegacyHeuristic(container) {
 /**
  * 创建fiberRoot
  * 整个渲染树的根对象指向rootFiber
+ * 这个方法主要是输出警告，并且调和旧的元素
  * @param {*} container 
  * @param {*} forceHydrate 
  */
@@ -169,6 +170,10 @@ function legacyCreateRootFromDOMContainer(
   );
 }
 
+/**
+ * render方法真正调用的主方法
+ * 主要步骤有初次渲染，创建fiberroot对象->将更新
+ */
 function legacyRenderSubtreeIntoContainer(
   parentComponent: ?React$Component<any, any>,
   children: ReactNodeList,
@@ -185,6 +190,7 @@ function legacyRenderSubtreeIntoContainer(
   // member of intersection type." Whyyyyyy.
   let root: RootType = (container._reactRootContainer: any);
   let fiberRoot;
+  // 首次渲染时不存在这个元素，初次渲染进入这个逻辑
   if (!root) {
     // Initial mount
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
@@ -200,6 +206,7 @@ function legacyRenderSubtreeIntoContainer(
       };
     }
     // Initial mount should not be batched.
+    // 初次渲染不需要批处理要立即同步更新
     unbatchedUpdates(() => {
       updateContainer(children, fiberRoot, parentComponent, callback);
     });
@@ -213,6 +220,7 @@ function legacyRenderSubtreeIntoContainer(
       };
     }
     // Update
+    // 不是首次渲染，比如之后调用setState更新都会将更新加入队列，等待事务调度更新
     updateContainer(children, fiberRoot, parentComponent, callback);
   }
   return getPublicRootInstance(fiberRoot);
@@ -281,6 +289,12 @@ export function hydrate(
   );
 }
 
+/**
+ * 渲染dom的入口方法
+ * @param {*} element
+ * @param {*} container 
+ * @param {*} callback 
+ */
 export function render(
   element: React$Element<any>,
   container: DOMContainer,

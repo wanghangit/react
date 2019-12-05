@@ -214,6 +214,9 @@ function findHostInstanceWithWarning(
   return findHostInstance(component);
 }
 
+/**
+ * 创建一个root的根对象
+ */
 export function createContainer(
   containerInfo: Container,
   tag: RootTag,
@@ -223,6 +226,10 @@ export function createContainer(
   return createFiberRoot(containerInfo, tag, hydrate, hydrationCallbacks);
 }
 
+/**
+ * 更新的主逻辑，
+ * 计算更新时间->创建更新的update对象->加入到调度队列->并开启任务调度
+ */
 export function updateContainer(
   element: ReactNodeList,
   container: OpaqueRoot,
@@ -232,7 +239,9 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
+  // 获取root上的根fiber对象
   const current = container.current;
+  // 获取当前的时间节点
   const currentTime = requestCurrentTimeForUpdate();
   if (__DEV__) {
     // $FlowExpectedError - jest isn't a global, and isn't recognized outside of tests
@@ -242,6 +251,7 @@ export function updateContainer(
     }
   }
   const suspenseConfig = requestCurrentSuspenseConfig();
+  // 计算当前的到期时间
   const expirationTime = computeExpirationForFiber(
     currentTime,
     current,
@@ -272,10 +282,11 @@ export function updateContainer(
       );
     }
   }
-
+  // 生成update对象，是批处理更新的一个单元
   const update = createUpdate(expirationTime, suspenseConfig);
   // Caution: React DevTools currently depends on this property
   // being called "element".
+  // 为update对象具体要更新的参数赋值，传入的是ReactElement元素
   update.payload = {element};
 
   callback = callback === undefined ? null : callback;
@@ -288,8 +299,9 @@ export function updateContainer(
     );
     update.callback = callback;
   }
-
+  // 将update将入fiber根对象上的任务队列
   enqueueUpdate(current, update);
+  // 开始执行任务调度，在到期时间内
   scheduleWork(current, expirationTime);
 
   return expirationTime;

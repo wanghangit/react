@@ -289,17 +289,22 @@ let spawnedWorkDuringRender: null | Array<ExpirationTime> = null;
 // receive the same expiration time. Otherwise we get tearing.
 let currentEventTime: ExpirationTime = NoWork;
 
+/**
+ * 计算当前时间
+ */
 export function requestCurrentTimeForUpdate() {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
     return msToExpirationTime(now());
   }
   // We're not inside React, so we may be in the middle of a browser event.
+  // 如果我们没在react内部更新中，可能是在执行浏览器的任务中
   if (currentEventTime !== NoWork) {
     // Use the same start time for all updates until we enter React again.
     return currentEventTime;
   }
   // This is the first update since React yielded. Compute a new start time.
+  // 之前的任务已经执行完，开启新的任务时候需要重新计算时间
   currentEventTime = msToExpirationTime(now());
   return currentEventTime;
 }
@@ -372,6 +377,11 @@ export function computeExpirationForFiber(
   return expirationTime;
 }
 
+/**
+ * 开始进行任务调度
+ * @param {*} fiber 
+ * @param {*} expirationTime 
+ */
 export function scheduleUpdateOnFiber(
   fiber: Fiber,
   expirationTime: ExpirationTime,
@@ -1184,6 +1194,9 @@ export function discreteUpdates<A, B, C, R>(
   }
 }
 
+/**
+ * 同步更新任务
+ */
 export function unbatchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   const prevExecutionContext = executionContext;
   executionContext &= ~BatchedContext;

@@ -132,6 +132,13 @@ function FiberRootNode(containerInfo, tag, hydrate) {
   }
 }
 
+/**
+ * 创建FiberRoot最终调用的方法
+ * @param {*} containerInfo 
+ * @param {*} tag 
+ * @param {*} hydrate 
+ * @param {*} hydrationCallbacks 
+ */
 export function createFiberRoot(
   containerInfo: any,
   tag: RootTag,
@@ -146,6 +153,7 @@ export function createFiberRoot(
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
   const uninitializedFiber = createHostRootFiber(tag);
+  // 将fiberroot的current指向一个rootfiber作为整个fiber树的根节点
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
 
