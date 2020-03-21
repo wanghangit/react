@@ -43,6 +43,7 @@ const UNIT_SIZE = 10;
 const MAGIC_NUMBER_OFFSET = Batched - 1;
 
 // 1 unit of expiration time represents 10ms.
+// 值越大优先级越高
 export function msToExpirationTime(ms: number): ExpirationTime {
   // Always add an offset so that we don't clash with the magic number for NoWork.
   return MAGIC_NUMBER_OFFSET - ((ms / UNIT_SIZE) | 0);
@@ -128,6 +129,7 @@ export function computeContinuousHydrationExpiration(
   return ContinuousHydration++;
 }
 
+// 根据到期时间返回对应的优先级
 export function inferPriorityFromExpirationTime(
   currentTime: ExpirationTime,
   expirationTime: ExpirationTime,

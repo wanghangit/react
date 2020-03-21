@@ -102,21 +102,21 @@ export type FiberRoot = {
 };
 
 function FiberRootNode(containerInfo, tag, hydrate) {
-  this.tag = tag;
-  this.current = null;
-  this.containerInfo = containerInfo;
-  this.pendingChildren = null;
+  this.tag = tag;// root的类型
+  this.current = null;// 指向当前root的rootfiber对象
+  this.containerInfo = containerInfo; // 当前root挂载的dom根元素
+  this.pendingChildren = null; // 只有在持久更新中会用到，也就是不支持增量更新的平台，react-dom不会用到
   this.pingCache = null;
   this.finishedExpirationTime = NoWork;
-  this.finishedWork = null;
+  this.finishedWork = null;   // 已经完成的任务的FiberRoot对象，如果你只有一个Root，那他永远只可能是这个Root对应的Fiber，或者是null, 在commit阶段只会处理这个值对应的任务
   this.timeoutHandle = noTimeout;
   this.context = null;
   this.pendingContext = null;
   this.hydrate = hydrate;
   this.callbackNode = null;
   this.callbackPriority = NoPriority;
-  this.firstPendingTime = NoWork;
-  this.firstSuspendedTime = NoWork;
+  this.firstPendingTime = NoWork; // 树中存在的最早的未到期时间
+  this.firstSuspendedTime = NoWork;// 最早的暂停到期时间
   this.lastSuspendedTime = NoWork;
   this.nextKnownPendingLevel = NoWork;
   this.lastPingedTime = NoWork;

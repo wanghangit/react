@@ -213,6 +213,7 @@ export function reconcileChildren(
   nextChildren: any,
   renderExpirationTime: ExpirationTime,
 ) {
+  // 没有currnet元素说明是第一次更新
   if (current === null) {
     // If this is a fresh new component that hasn't been rendered yet, we
     // won't update its child set by applying minimal side-effects. Instead,
@@ -596,6 +597,7 @@ function markRef(current: Fiber | null, workInProgress: Fiber) {
   }
 }
 
+// 更新函数组件fiber
 function updateFunctionComponent(
   current,
   workInProgress,
@@ -2730,6 +2732,7 @@ function bailoutOnAlreadyFinishedWork(
   }
 
   // Check if the children have any pending work.
+  // 检查子节点是否可以更新
   const childExpirationTime = workInProgress.childExpirationTime;
   if (childExpirationTime < renderExpirationTime) {
     // The children don't have any work either. We can skip them.
@@ -2739,6 +2742,7 @@ function bailoutOnAlreadyFinishedWork(
   } else {
     // This fiber doesn't have work, but its subtree does. Clone the child
     // fibers and continue.
+    // 子节点需要更新直接拷贝fiber节点 
     cloneChildFibers(current, workInProgress);
     return workInProgress.child;
   }
@@ -2833,18 +2837,18 @@ function beginWork(
   }
 
   if (current !== null) {
-    const oldProps = current.memoizedProps;
-    const newProps = workInProgress.pendingProps;
+    const oldProps = current.memoizedProps; // 获取上次更新的props
+    const newProps = workInProgress.pendingProps; // 获取新的props
 
     if (
-      oldProps !== newProps ||
-      hasLegacyContextChanged() ||
+      oldProps !== newProps || // 前后props不相等
+      hasLegacyContextChanged() || // Context改变了
       // Force a re-render if the implementation changed due to hot reload:
       (__DEV__ ? workInProgress.type !== current.type : false)
     ) {
       // If props or context changed, mark the fiber as having performed work.
       // This may be unset if the props are determined to be equal later (memo).
-      didReceiveUpdate = true;
+      didReceiveUpdate = true; // 标记已经执行工作
     } else if (updateExpirationTime < renderExpirationTime) {
       didReceiveUpdate = false;
       // This fiber does not have any pending work. Bailout without entering

@@ -141,12 +141,14 @@ export type Fiber = {|
 
   // The value of element.type which is used to preserve the identity during
   // reconciliation of this child.
+  // 在调和child时会用到
   elementType: any,
 
   // The resolved function/class/ associated with this fiber.
   type: any,
 
   // The local state associated with this fiber.
+  // 
   stateNode: any,
 
   // Conceptual aliases
@@ -159,10 +161,13 @@ export type Fiber = {|
   // This is effectively the parent, but there can be multiple parents (two)
   // so this is only the parent of the thing we're currently processing.
   // It is conceptually the same as the return address of a stack frame.
+  // 指向父节点fiber
   return: Fiber | null,
 
   // Singly Linked List Tree Structure.
+  // 指向第一个儿子fiber
   child: Fiber | null,
+  // 指向下一个兄弟节点
   sibling: Fiber | null,
   index: number,
 
@@ -171,13 +176,16 @@ export type Fiber = {|
   ref: null | (((handle: mixed) => void) & {_stringRef: ?string}) | RefObject,
 
   // Input is the data coming into process this fiber. Arguments. Props.
+  // 等待更新的props
   pendingProps: any, // This type will be more specific once we overload the tag.
-  memoizedProps: any, // The props used to create the output.
+  memoizedProps: any, // The props used to create the output.上一次更新的props
 
   // A queue of state updates and callbacks.
+  // 一个存放state的队列
   updateQueue: UpdateQueue<any> | null,
 
   // The state used to create the output
+  // 上一次更新的state
   memoizedState: any,
 
   // Dependencies (contexts, events) for this fiber, if it has any

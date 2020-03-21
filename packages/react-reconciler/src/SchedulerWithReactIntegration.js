@@ -134,6 +134,10 @@ export function scheduleCallback(
   return Scheduler_scheduleCallback(priorityLevel, callback, options);
 }
 
+/**
+ * 同步任务调度的中间方法,如果队列不为空就加入队列，如果为空就立即推入任务调度队列
+ * @param {*} callback 
+ */
 export function scheduleSyncCallback(callback: SchedulerCallback) {
   // Push this callback into an internal queue. We'll flush these either in
   // the next tick, or earlier if something calls `flushSyncCallbackQueue`.

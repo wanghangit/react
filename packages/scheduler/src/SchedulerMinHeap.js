@@ -12,18 +12,18 @@ type Node = {
   id: number,
   sortIndex: number,
 };
-
+// 推入元素
 export function push(heap: Heap, node: Node): void {
   const index = heap.length;
   heap.push(node);
   siftUp(heap, node, index);
 }
-
+// 查看当前最小元素
 export function peek(heap: Heap): Node | null {
   const first = heap[0];
   return first === undefined ? null : first;
 }
-
+// 取出最小的元素
 export function pop(heap: Heap): Node | null {
   const first = heap[0];
   if (first !== undefined) {

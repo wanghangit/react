@@ -44,9 +44,11 @@ if (
   getCurrentTime = function() {
     return Date.now() - initialTime;
   };
+  // 用异步的方法执行回调函数
   requestHostCallback = function(cb) {
     if (_callback !== null) {
       // Protect against re-entrancy.
+      // 将cb当参数传入requestHostCallback
       setTimeout(requestHostCallback, 0, cb);
     } else {
       _callback = cb;
@@ -121,7 +123,7 @@ if (
   // TODO: Adjust this based on priority?
   let maxYieldInterval = 300;
   let needsPaint = false;
-
+  
   if (
     enableIsInputPending &&
     navigator !== undefined &&
@@ -182,13 +184,15 @@ if (
       yieldInterval = 5;
     }
   };
-
+  // 执行工作直到超时
   const performWorkUntilDeadline = () => {
+    // 可能有被取消的情况
     if (scheduledHostCallback !== null) {
       const currentTime = getCurrentTime();
       // Yield after `yieldInterval` ms, regardless of where we are in the vsync
       // cycle. This means there's always time remaining at the beginning of
       // the message event.
+      // 设置超时时间根据fps算出来的
       deadline = currentTime + yieldInterval;
       const hasTimeRemaining = true;
       try {
@@ -196,12 +200,14 @@ if (
           hasTimeRemaining,
           currentTime,
         );
+        // 如果没有更多的工作
         if (!hasMoreWork) {
           isMessageLoopRunning = false;
           scheduledHostCallback = null;
         } else {
           // If there's more work, schedule the next message event at the end
           // of the preceding one.
+          // 如果有更多的工作就一直触发
           port.postMessage(null);
         }
       } catch (error) {
@@ -221,7 +227,7 @@ if (
   const channel = new MessageChannel();
   const port = channel.port2;
   channel.port1.onmessage = performWorkUntilDeadline;
-
+  //设置任务并异步调用
   requestHostCallback = function(callback) {
     scheduledHostCallback = callback;
     if (!isMessageLoopRunning) {
@@ -229,7 +235,7 @@ if (
       port.postMessage(null);
     }
   };
-
+  // 取消回调
   cancelHostCallback = function() {
     scheduledHostCallback = null;
   };

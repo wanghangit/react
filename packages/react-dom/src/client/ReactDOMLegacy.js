@@ -191,7 +191,7 @@ function legacyRenderSubtreeIntoContainer(
   let root: RootType = (container._reactRootContainer: any);
   let fiberRoot;
   // 首次渲染时不存在这个元素，初次渲染进入这个逻辑
-  if (!root) {
+  if (!root) { 
     // Initial mount
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,

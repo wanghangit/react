@@ -266,6 +266,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     // deletions, so we can just append the deletion to the list. The remaining
     // effects aren't added until the complete phase. Once we implement
     // resuming, this may not be true.
+    // 在副作用的链表中插入一个删除的副作用
     const last = returnFiber.lastEffect;
     if (last !== null) {
       last.nextEffect = childToDelete;
@@ -276,7 +277,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     childToDelete.nextEffect = null;
     childToDelete.effectTag = Deletion;
   }
-
+  // 删除传入fiber后的所有兄弟节点
   function deleteRemainingChildren(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -289,6 +290,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     // TODO: For the shouldClone case, this could be micro-optimized a bit by
     // assuming that after the first child we've already added everything.
     let childToDelete = currentFirstChild;
+    // 将兄弟节点都删除
     while (childToDelete !== null) {
       deleteChild(returnFiber, childToDelete);
       childToDelete = childToDelete.sibling;
@@ -550,7 +552,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     // Update the fiber if the keys match, otherwise return null.
 
     const key = oldFiber !== null ? oldFiber.key : null;
-
+    // 文本节点不用复用key
     if (typeof newChild === 'string' || typeof newChild === 'number') {
       // Text nodes don't have keys. If the previous node is implicitly keyed
       // we can continue to replace it without aborting even if it is not a text
@@ -795,12 +797,13 @@ function ChildReconciler(shouldTrackSideEffects) {
     let newIdx = 0;
     let nextOldFiber = null;
     for (; oldFiber !== null && newIdx < newChildren.length; newIdx++) {
-      if (oldFiber.index > newIdx) {
+      if (oldFiber.index > newIdx) { // 如果位置不匹配
         nextOldFiber = oldFiber;
         oldFiber = null;
       } else {
         nextOldFiber = oldFiber.sibling;
       }
+      // 找到可以复用key的元素
       const newFiber = updateSlot(
         returnFiber,
         oldFiber,
@@ -815,6 +818,7 @@ function ChildReconciler(shouldTrackSideEffects) {
         if (oldFiber === null) {
           oldFiber = nextOldFiber;
         }
+        // 如果不能复用直接跳出循环
         break;
       }
       if (shouldTrackSideEffects) {
@@ -838,13 +842,13 @@ function ChildReconciler(shouldTrackSideEffects) {
       previousNewFiber = newFiber;
       oldFiber = nextOldFiber;
     }
-
+    // 如果新的children已经遍历完就移除所有旧的fiber
     if (newIdx === newChildren.length) {
       // We've reached the end of the new children. We can delete the rest.
       deleteRemainingChildren(returnFiber, oldFiber);
       return resultingFirstChild;
     }
-
+    // 如果老的遍历完了，就将新的全部插入，连成一个链表
     if (oldFiber === null) {
       // If we don't have any more existing children we can choose a fast path
       // since the rest will all be insertions.
@@ -868,7 +872,7 @@ function ChildReconciler(shouldTrackSideEffects) {
       }
       return resultingFirstChild;
     }
-
+    // 将老的生成一个map
     // Add all children to a key map for quick lookups.
     const existingChildren = mapRemainingChildren(returnFiber, oldFiber);
 
@@ -1128,7 +1132,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     created.return = returnFiber;
     return created;
   }
-
+  // 调和单个元素
   function reconcileSingleElement(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -1140,6 +1144,7 @@ function ChildReconciler(shouldTrackSideEffects) {
     while (child !== null) {
       // TODO: If key === null and child.key === null, then this only applies to
       // the first item in the list.
+      // 如果遍历到的key和新的key一样
       if (child.key === key) {
         if (
           child.tag === Fragment
@@ -1150,7 +1155,9 @@ function ChildReconciler(shouldTrackSideEffects) {
                 ? isCompatibleFamilyForHotReloading(child, element)
                 : false)
         ) {
+          // 如果标签的type相同，将其他兄弟节点删除
           deleteRemainingChildren(returnFiber, child.sibling);
+          // 复用之前的fiber
           const existing = useFiber(
             child,
             element.type === REACT_FRAGMENT_TYPE
@@ -1166,15 +1173,17 @@ function ChildReconciler(shouldTrackSideEffects) {
           }
           return existing;
         } else {
+          // 如果type不一样直接删除所有child
           deleteRemainingChildren(returnFiber, child);
           break;
         }
       } else {
+        // key不相同就一个一个删除
         deleteChild(returnFiber, child);
       }
       child = child.sibling;
     }
-
+    // 根据type创建不同的元素
     if (element.type === REACT_FRAGMENT_TYPE) {
       const created = createFiberFromFragment(
         element.props.children,
@@ -1243,6 +1252,7 @@ function ChildReconciler(shouldTrackSideEffects) {
   // This API will tag the children with the side-effect of the reconciliation
   // itself. They will be added to the side-effect list as we pass through the
   // children and the parent.
+  // 更新调和children的方法
   function reconcileChildFibers(
     returnFiber: Fiber,
     currentFirstChild: Fiber | null,
@@ -1257,21 +1267,23 @@ function ChildReconciler(shouldTrackSideEffects) {
     // Handle top level unkeyed fragments as if they were arrays.
     // This leads to an ambiguity between <>{[...]}</> and <>...</>.
     // We treat the ambiguous cases above the same.
+    // 判断是不是类似<></>这样的顶部标签
     const isUnkeyedTopLevelFragment =
       typeof newChild === 'object' &&
       newChild !== null &&
       newChild.type === REACT_FRAGMENT_TYPE &&
       newChild.key === null;
+    // 如果是直接取props上的children属性
     if (isUnkeyedTopLevelFragment) {
       newChild = newChild.props.children;
     }
 
     // Handle object types
     const isObject = typeof newChild === 'object' && newChild !== null;
-
+    // 如果是对象
     if (isObject) {
       switch (newChild.$$typeof) {
-        case REACT_ELEMENT_TYPE:
+        case REACT_ELEMENT_TYPE: // 调和单个元素
           return placeSingleChild(
             reconcileSingleElement(
               returnFiber,
